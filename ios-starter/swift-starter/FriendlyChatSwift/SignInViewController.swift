@@ -27,8 +27,25 @@ class SignInViewController: UIViewController, GIDSignInUIDelegate {
   override func viewDidLoad() {
     super.viewDidLoad()
     GIDSignIn.sharedInstance().uiDelegate = self
+    
+    //Automatically sign in the user. Then add a listener to Firebase Auth, to let the user into the app, after successful sign in. And remove the listener on deinit.
+    
+    GIDSignIn.sharedInstance().signInSilently()
+    handle = Auth.auth().addStateDidChangeListener() { (auth, user) in
+        if user != nil {
+            MeasurementHelper.sendLoginEvent()
+            self.performSegue(withIdentifier: Constants.Segues.SignInToFp, sender: nil)
+        }
+        
+        
+    }
   }
 
   deinit {
+    if let handle = handle {
+        Auth.auth().removeStateDidChangeListener(handle)
+    }
+    
+    
   }
 }
